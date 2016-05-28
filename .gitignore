@@ -4,6 +4,7 @@ _site
 .Rbuildignore
 .Rhistory
 .Rprofile
+.Rdata
 .Rproj.user/
 R/.Rhistory
 packrat/
