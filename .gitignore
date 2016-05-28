@@ -8,3 +8,5 @@ _site
 R/.Rhistory
 packrat/
 madr.Rproj
+packrat/lib*/
+.Rproj.user
