@@ -19,7 +19,6 @@ Collate:
     'MADproject.R'
     'calcLikelihood.R'
     'calcPosterior.R'
-    'hello.R'
     'plot.R'
     'readMAD.R'
 RoxygenNote: 5.0.1.9000

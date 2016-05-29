@@ -12,7 +12,7 @@ readMAD(proj)
 }
 \value{
 An updated MADproject object with slots \code{numTimesteps},
-   \code{numLocations}, \code{numSamples}, \code {observations},
+   \code{numLocations}, \code{numSamples}, \code{observations},
    and \code{realizations} filled in from the MAD# databases.
 }
 \description{

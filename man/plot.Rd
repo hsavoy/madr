@@ -7,7 +7,11 @@
 plot(x, y, ...)
 }
 \arguments{
-\item{proj}{The MADproject object}
+\item{x}{The MADproject object}
+
+\item{y}{not supported}
+
+\item{...}{not supported}
 }
 \value{
 NULL.

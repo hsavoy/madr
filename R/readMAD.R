@@ -1,7 +1,6 @@
 #' @include MADproject.R
 NULL
 
-
 #' Read the SQLite databases from MAD# into the MADproject object.
 #'
 #' \code{readMAD} returns an updated MADproject object with data from
@@ -10,9 +9,8 @@ NULL
 #' @param proj The MADproject object with the slots \code{madname},
 #'   \code{resultname}, and \code{xpath} specified.
 #' @return An updated MADproject object with slots \code{numTimesteps},
-#'    \code{numLocations}, \code{numSamples}, \code {observations},
+#'    \code{numLocations}, \code{numSamples}, \code{observations},
 #'    and \code{realizations} filled in from the MAD# databases.
-#'
 setGeneric("readMAD", function(proj) {
   standardGeneric("readMAD")
 })
