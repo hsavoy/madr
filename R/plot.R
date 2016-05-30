@@ -10,12 +10,12 @@ NULL
 #' @param ... not supported
 #' @return NULL.
 #'
+#' @export
 setGeneric("plot")
 
 setMethod("plot",
           signature(x="MADproject"),   #plot all available plots
           function(x) {
-            message("I'll do my own plots!")
             #Plot observations
             if(dim(x@observations)[1] > 0){
               plot(x,"observations")

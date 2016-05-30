@@ -14,7 +14,9 @@ Imports:
     np,
     RSQLite,
     DBI,
-    methods
+    methods,
+    graphics,
+    stats
 Collate:
     'madr.R'
     'MADproject.R'

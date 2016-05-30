@@ -11,6 +11,8 @@ NULL
 #' @return An updated MADproject object with slots \code{numTimesteps},
 #'    \code{numLocations}, \code{numSamples}, \code{observations},
 #'    and \code{realizations} filled in from the MAD# databases.
+#'
+#' @export
 setGeneric("readMAD", function(proj) {
   standardGeneric("readMAD")
 })

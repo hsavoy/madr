@@ -9,7 +9,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-The `madr` package is intended to handle the post-processing of projects created by MAD#, the software implmentation of the Method of Anchored distributions (see our [Codeplex site](http://www.mad.codeplex.com)). 
+
+The `madr` package is intended to handle the post-processing of projects created by MAD#, the software implmentation of the Method of Anchored distributions (see our [Codeplex site](http://www.codeplex.com/mad)). 
 
 However, the package is in early development and as such only has the following features:
 
@@ -26,42 +27,44 @@ while making the following assumptions:
 
 ## Vignette Info
 
-This vingnette will step through an example using the data `pumping`
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output:
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side.
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+This vingnette will step through an example of applying `madr` using the dataset `pumping` which contains results from a MAD# project pertaining to characterizing an aquifer's mean natural-log hydraulic conductivity by using a time series of drawdown (change in hydraulic head) at a monitoring well in the field as inversion data. The `MADproject` object has slots `projectname`, `numSamples`, `observations`, and `realizations` filled. Normally, the function `readMAD` would be used to fill in the object from databases produced by MAD#, but this has done already for `pumping` for a more portable example. This also helps show that the use of MAD# is not entirely necessary: you can fill in a `MADproject` object with data from another application and still apply the MAD analysis. 
+```{r, message=FALSE, echo=FALSE}
+library(np)
+```
+```{r}
+library(madr)
+data("pumping")
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+## Viewing Data
+The `plot` function can be used to view different data from the `MADproject` object. Pass the object as the first argument followed by
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+- nothing: yields all available plots given data
+- `"observations"`: yields a plot of the observation as a function of time step.
+- `"realizations"`: yields a plot of the samples' realizations as a polygon representing the interquartile ranges of the realization values as a function of the time steps. Only works if `@numSamples` is less than five. The observations is also plotted for comparison.
+- `"posterior"`: yields a barplot of the posterior distribution for the samples. 
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+Below is an example of requesting to plot the realizations for the `pumping` dataset.
+```{r, fig.width=7.2, fig.height=4 }
+plot(pumping, "realizations")
+```
+ 
+## Applying MAD
+The `madr` package can take this information and calculate the posterior of the random parameter in question based on requested inversion data. Below, the 100th time step is used as the inversion data, then the posterior is calculated and plotted (again, using the `plot` function).
 
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r, results='hide'}
+pumping <- calcLikelihood(pumping, list(timesteps=100))
+pumping <- calcPosterior(pumping)
+```
+```{r, fig.width=7.2, fig.height=4}
+plot(pumping, "posteriors")
 ```
 
-Also a quote using `>`:
+## Coming Soon
+Here are additional features that are planned for near-future development:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+- More than one measurement location
+- Dimension reduction techniques so more than just time steps can be used for inversion
+- Continuous priors/posteriors
+- Convergence testing for the number of realizations
+- Multiple random parameters

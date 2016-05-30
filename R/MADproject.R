@@ -11,6 +11,8 @@ NULL
 #' @slot realizations A list of length \code{numSamples} with each element containing
 #'   a numeric (number of realizations)-by-\code{numLocations*numTimesteps} matrix
 #'   to hold the ensemble of simulated measurements.
+#'
+#' @export
 MADproject <- setClass(
   # Set the name for the class
   "MADproject",

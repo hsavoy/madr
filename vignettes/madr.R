@@ -1,7 +1,17 @@
-## ---- fig.show='hold'----------------------------------------------------
-plot(1:10)
-plot(10:1)
+## ---- message=FALSE, echo=FALSE------------------------------------------
+library(np)
 
-## ---- echo=FALSE, results='asis'-----------------------------------------
-knitr::kable(head(mtcars, 10))
+## ------------------------------------------------------------------------
+library(madr)
+data("pumping")
+
+## ---- fig.width=7.2, fig.height=4----------------------------------------
+plot(pumping, "realizations")
+
+## ---- results='hide'-----------------------------------------------------
+pumping <- calcLikelihood(pumping, list(timesteps=100))
+pumping <- calcPosterior(pumping)
+
+## ---- fig.width=7.2, fig.height=4----------------------------------------
+plot(pumping, "posteriors")
 

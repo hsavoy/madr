@@ -12,11 +12,11 @@ calcLikelihood(proj, data)
 \item{data}{The kind of data to use for the likelihood calculations.}
 }
 \value{
-likes A list of matching length as \code{data} the likelihood values 
+likes A list of matching length as \code{data} the likelihood values
   for each sample based on \code{data}.
 }
 \description{
-\code{calcLikelihood} returns the likelihood values based on the 
+\code{calcLikelihood} returns the likelihood values based on the
 observation and realization data in MADproject and the requested
 inversion data type \code{data}.
 }
