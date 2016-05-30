@@ -19,9 +19,11 @@ Collate:
     'MADproject.R'
     'calcLikelihood.R'
     'calcPosterior.R'
+    'data.R'
     'plot.R'
     'readMAD.R'
 RoxygenNote: 5.0.1.9000
-Suggests: knitr,
+Suggests:
+    knitr,
     rmarkdown
 VignetteBuilder: knitr
