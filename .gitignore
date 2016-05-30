@@ -11,3 +11,4 @@ packrat/
 madr.Rproj
 packrat/lib*/
 .Rproj.user
+inst/doc
