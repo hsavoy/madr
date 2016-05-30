@@ -8,11 +8,12 @@ Description: Reads MAD# result databases, performs dimension reduction on
     Also generates plots and reports to summarize results.
 Depends:
     R (>= 3.1.0)
-License: What license is it under?
+License: MIT + file LICENSE
 LazyData: true
 Imports:
     np,
     RSQLite,
+    DBI,
     methods
 Collate:
     'madr.R'
