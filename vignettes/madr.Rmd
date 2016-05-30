@@ -1,23 +1,32 @@
 ---
 title: "madr"
 author: "Heather Savoy"
-date: "`r Sys.Date()`"
+date: "`r format(Sys.time(), '%a %b %d %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{madr}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+The `madr` package is intended to handle the post-processing of projects created by MAD#, the software implmentation of the Method of Anchored distributions (see our [Codeplex site](http://www.mad.codeplex.com)). 
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+However, the package is in early development and as such only has the following features:
+
+- Reading the MAD# databases into a `MADproject` S4 class object
+- Calculating non-parametric likelihood values using the `np` package 
+- Calculating posterior distributions
+- Generating plots for the observations, realizations, and posteriors
+
+while making the following assumptions:
+
+- There is only one measurement location (more that one can be read into the `MADproject` object but will not be handled for analysis and plotting).
+- There is a single random parameter and its prior is a discrete uniform distribution.
+- The inversion data consist of timesteps from the single measurement location's time series.
 
 ## Vignette Info
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+This vingnette will step through an example 
 
 ## Styles
 
