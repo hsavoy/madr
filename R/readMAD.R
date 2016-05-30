@@ -22,7 +22,7 @@ setMethod("readMAD",
             #Setup database
             database <- paste(proj@xpath,"/",proj@madname,"_",proj@resultname,".xResult",sep="")
             datasample <- paste(proj@xpath,"/",proj@resultname,"/",proj@madname,"_",proj@resultname,sep="")
-            drv <- RSQLite::dbDriver("SQLite")
+            drv <- DBI::dbDriver("SQLite")
             con <- RSQLite::dbConnect(drv, dbname =database)
             #Read project specifics
             proj@numLocations <- as.numeric(RSQLite::dbGetQuery( con,'select count(*) from selection' ))
@@ -31,7 +31,7 @@ setMethod("readMAD",
             #Read observations
             sqlvector=paste("select sv.value from  selectionvalues sv, likelihoodselecgroup s where sv.idselectionvalues= s.idselectionvalues   and s.idlikegroup=",1," order by sv.idselectionvalues;",sep='');
             res<- RSQLite::dbSendQuery(con,sqlvector)
-            vector <- RSQLite::fetch(res, n=-1)
+            vector <- DBI::fetch(res, n=-1)
             Observationvector <- vector$value
             RSQLite::dbClearResult(res)
             proj@observations <- matrix(Observationvector,nrow=proj@numTimesteps,
@@ -45,7 +45,7 @@ setMethod("readMAD",
 
                 sql1=paste("select sv.idselectionvalues from  likelihoodselecgroup sv where  sv.idlikegroup=",1," order by sv.idselectionvalues",sep='');
                 res<- RSQLite::dbSendQuery(con,sql1)
-                zvectorid <- RSQLite::fetch(res, n=-1)
+                zvectorid <- DBI::fetch(res, n=-1)
                 zvector=zvectorid$idselectionvalues
                 RSQLite::dbClearResult(res)
                 counter=1
@@ -57,7 +57,7 @@ setMethod("readMAD",
                 for(i in zvector){
                   sql2=paste("select r.value  from resultselection r, resultid ri where r.idresult=ri.idresult and ri.sample=",sample," and r.idselectionvalues=",i,"  order by ri.realization limit ", numrea,";",sep='');
                   res<- RSQLite::dbSendQuery(consa,sql2);
-                  realizations<- RSQLite::fetch(res, n=-1);
+                  realizations<- DBI::fetch(res, n=-1);
                   value= realizations$value;
                   proj@realizations[[sample]][,counter]=value;
                   counter=counter+1;
