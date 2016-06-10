@@ -25,6 +25,8 @@ Collate:
     'data.R'
     'plot.R'
     'readMAD.R'
+    'reduceData.R'
+    'reduceFUN.R'
 RoxygenNote: 5.0.1.9000
 Suggests:
     knitr,

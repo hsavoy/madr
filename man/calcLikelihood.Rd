@@ -12,7 +12,8 @@ calcLikelihood(proj, data)
 \item{data}{The kind of data to use for the likelihood calculations.}
 }
 \value{
-likes A list of matching length as \code{data} the likelihood values
+proj The updated MADproject object with a list of matching length
+  as \code{data} the likelihood values
   for each sample based on \code{data}.
 }
 \description{

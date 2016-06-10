@@ -60,6 +60,27 @@ pumping <- calcPosterior(pumping)
 plot(pumping, "posteriors")
 ```
 
+## Applying MAD with Dimension Reduction
+The `madr` package can take this information and calculate the posterior of the random parameter in question based on requested inversion data. Below, the 100th time step is used as the inversion data, then the posterior is calculated and plotted (again, using the `plot` function).
+
+```{r, results='hide'}
+pumping.min <- reduceData(pumping, min)
+pumping.min <- calcLikelihood(pumping.min)
+pumping.min <- calcPosterior(pumping.min)
+```
+```{r, fig.width=7.2, fig.height=4}
+plot(pumping.min, "posteriors")
+```
+
+```{r, results='hide'}
+pumping.matern <- reduceData(pumping, matern, init.matern)
+pumping.matern <- calcLikelihood(pumping.matern)
+pumping.matern <- calcPosterior(pumping.matern)
+```
+```{r, fig.width=7.2, fig.height=4}
+plot(pumping.matern, "posteriors")
+```
+
 ## Coming Soon
 Here are additional features that are planned for near-future development:
 

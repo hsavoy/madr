@@ -9,7 +9,8 @@ NULL
 #'
 #' @param proj The MADproject object with data read from the MAD# databases.
 #' @param data The kind of data to use for the likelihood calculations.
-#' @return likes A list of matching length as \code{data} the likelihood values
+#' @return proj The updated MADproject object with a list of matching length
+#'   as \code{data} the likelihood values
 #'   for each sample based on \code{data}.
 #'
 #' @export
@@ -32,6 +33,19 @@ setMethod("calcLikelihood",
               } else {
                 message("Unknown inversion data type. See ?calcLikelihood")
               }
+            }
+            return(proj)
+          }
+)
+
+setMethod("calcLikelihood",
+          signature(proj="MADproject"),
+          function(proj) {
+            proj@likelihoods <- vector("list", 1)
+            proj@likelihoods[[1]] <- vector("numeric", length(proj@numSamples))
+            for(sample in 1:proj@numSamples){
+              proj@likelihoods[[1]][sample] <- np::npudens(tdat=proj@realizations[[sample]], #assuming Meas1
+                                                           edat=t(as.matrix(proj@observations[,1])))$dens  #assuming Meas1
             }
             return(proj)
           }
