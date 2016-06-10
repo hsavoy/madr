@@ -14,20 +14,25 @@ NULL
 #'   for each sample based on \code{data}.
 #'
 #' @export
-setGeneric("calcLikelihood", function(proj, data) {
+setGeneric("calcLikelihood", function(proj, data, ...) {
   standardGeneric("calcLikelihood")
 })
 
 setMethod("calcLikelihood",
           signature(proj="MADproject", data="list"),
-          function(proj, data) {
+          function(proj, data, num_realz=NA, samples=1:proj@numSamples) {
             proj@likelihoods <- vector("list", length(data))
             for (i in 1:length(data)){
-              proj@likelihoods[[i]] <- vector("numeric", length(proj@numSamples))
+              proj@likelihoods[[i]] <- vector("numeric", length(samples))
               names(proj@likelihoods)[i] <- paste0(names(data)[i],data[[i]])
               if(names(data)[i]=="timesteps"){
-                for(sample in 1:proj@numSamples){
-                  proj@likelihoods[[i]][sample] <- np::npudens(tdat=proj@realizations[[sample]][,data[[i]]], #assuming Meas1
+                for(scount in 1:length(samples)){
+                  if(is.na(num_realz)){
+                    subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
+                  }else{
+                    subset <- 1:num_realz
+                  }
+                  proj@likelihoods[[i]][scount] <- np::npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]], #assuming Meas1
                                                edat=t(as.matrix(proj@observations[data[[i]],1])))$dens  #assuming Meas1
                 }
               } else {
@@ -40,11 +45,16 @@ setMethod("calcLikelihood",
 
 setMethod("calcLikelihood",
           signature(proj="MADproject"),
-          function(proj) {
+          function(proj, num_realz=NA, samples=1:proj@numSamples) {
             proj@likelihoods <- vector("list", 1)
-            proj@likelihoods[[1]] <- vector("numeric", length(proj@numSamples))
-            for(sample in 1:proj@numSamples){
-              proj@likelihoods[[1]][sample] <- np::npudens(tdat=proj@realizations[[sample]], #assuming Meas1
+            proj@likelihoods[[1]] <- vector("numeric", length(samples))
+            for(scount in 1:length(samples)){
+              if(is.na(num_realz)){
+                subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
+              }else{
+                subset <- 1:num_realz
+              }
+              proj@likelihoods[[1]][scount] <- np::npudens(tdat=proj@realizations[[samples[scount]]][subset,], #assuming Meas1
                                                            edat=t(as.matrix(proj@observations[,1])))$dens  #assuming Meas1
             }
             return(proj)

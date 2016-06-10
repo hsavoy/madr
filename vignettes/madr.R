@@ -31,3 +31,6 @@ pumping.matern <- calcPosterior(pumping.matern)
 ## ---- fig.width=7.2, fig.height=4----------------------------------------
 plot(pumping.matern, "posteriors")
 
+## ---- fig.width=7.2, fig.height=4, message=FALSE, results='hide'---------
+test_convergence(pumping.matern, samples=2:4)
+

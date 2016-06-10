@@ -81,11 +81,18 @@ pumping.matern <- calcPosterior(pumping.matern)
 plot(pumping.matern, "posteriors")
 ```
 
+## Convergence testing
+In order to assess the convergence of the likelihood values, you can call the 
+`test_convergence` function that will take a MADporject object and calculate
+likelihood values for a range of realization counts.
+```{r, fig.width=7.2, fig.height=4, message=FALSE, results='hide'}
+test_convergence(pumping.matern, samples=2:4)
+```
+
 ## Coming Soon
 Here are additional features that are planned for near-future development:
 
 - More than one measurement location
 - Dimension reduction techniques so more than just time steps can be used for inversion
 - Continuous priors/posteriors
-- Convergence testing for the number of realizations
 - Multiple random parameters

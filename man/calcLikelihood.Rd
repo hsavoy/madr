@@ -4,7 +4,7 @@
 \alias{calcLikelihood}
 \title{Calculate the likelihood for a MADproject object.}
 \usage{
-calcLikelihood(proj, data)
+calcLikelihood(proj, data, ...)
 }
 \arguments{
 \item{proj}{The MADproject object with data read from the MAD# databases.}
