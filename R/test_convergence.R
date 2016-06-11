@@ -50,7 +50,8 @@ setMethod("test_convergence",
             plot(NULL, xlim=range(rseq), ylim=range(log10(likes)),
                  xlab="Number of Realizations", ylab="log(likelihood)")
             for(scount in 1:length(samples)) {
-              lines(rseq, log10(likes[,scount]), col=scount)
+              lines(rseq, log10(likes[,scount]),
+                    col=grDevices::adjustcolor(samples[scount]+1,alpha.f=1))
             }
           }
 )

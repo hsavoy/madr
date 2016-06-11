@@ -16,6 +16,7 @@ However, the package is in early development and as such only has the following 
 
 - Reading the MAD# databases into a `MADproject` S4 class object
 - Calculating non-parametric likelihood values using the `np` package 
+- Testing convergence of likelihood values as a function of the number of realizations
 - Calculating posterior distributions
 - Generating plots for the observations, realizations, and posteriors
 
@@ -23,7 +24,7 @@ while making the following assumptions:
 
 - There is only one measurement location (more that one can be read into the `MADproject` object but will not be handled for analysis and plotting).
 - There is a single random parameter and its prior is a discrete uniform distribution.
-- The inversion data consist of timesteps from the single measurement location's time series.
+- The inversion data consist of timesteps from the single measurement location's time series, a parameter-less function (e.g. `min`) of that time series, or a function to be fitted to the time series (e.g. `matern`). 
 
 ## Vignette Info
 
@@ -74,6 +75,11 @@ plot(pumping.min, "posteriors")
 
 ```{r, results='hide'}
 pumping.matern <- reduceData(pumping, matern, init.matern)
+```
+```{r, fig.width=7.2, fig.height=8}
+plot(pumping.matern, "realizations")
+```
+```{r, results='hide'}
 pumping.matern <- calcLikelihood(pumping.matern)
 pumping.matern <- calcPosterior(pumping.matern)
 ```

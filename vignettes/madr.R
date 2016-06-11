@@ -25,6 +25,11 @@ plot(pumping.min, "posteriors")
 
 ## ---- results='hide'-----------------------------------------------------
 pumping.matern <- reduceData(pumping, matern, init.matern)
+
+## ---- fig.width=7.2, fig.height=8----------------------------------------
+plot(pumping.matern, "realizations")
+
+## ---- results='hide'-----------------------------------------------------
 pumping.matern <- calcLikelihood(pumping.matern)
 pumping.matern <- calcPosterior(pumping.matern)
 
