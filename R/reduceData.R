@@ -34,7 +34,7 @@ setMethod("reduceData",
           signature(proj="MADproject", method="function", params="function"), #then fit w/ params
           function(proj, method, params, ...) {
             fit <- nls(y~match.fun(method)(t,init.params),
-                data=data.frame(t=1:proj@numTimesteps,y=proj@observations),
+                data=data.frame(t=1:proj@numTimesteps,y=proj@observations[,1]),
                 start=list(init.params=match.fun(params)(proj@observations[,1])),
                 nls.control(warnOnly=TRUE)
             )
