@@ -24,7 +24,6 @@ inst/doc
 
 
 # produced vignettes
-vignettes/*.html
 vignettes/*.pdf
 vignettes/*_cache/*
 vignettes/*_files/*
