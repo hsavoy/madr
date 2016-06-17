@@ -47,7 +47,7 @@ setMethod("test_convergence",
               temp <- calcLikelihood(proj, num_realz=rseq[rcount], samples=samples)
               likes[rcount,] <- temp@likelihoods[[1]]
             }
-            plot(NULL, xlim=range(rseq), ylim=range(log10(likes)),
+            plot(NULL, xlim=range(rseq), ylim=range(log10(likes), na.rm=TRUE, finite=TRUE),
                  xlab="Number of Realizations", ylab="log(likelihood)")
             for(scount in 1:length(samples)) {
               lines(rseq, log10(likes[,scount]),
