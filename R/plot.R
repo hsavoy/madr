@@ -17,7 +17,7 @@ setMethod("plot",
           signature(x="MADproject"),   #plot all available plots
           function(x,...) {
             #Plot observations
-            if(dim(x@observations)[1] > 0){
+            if(length(x@observations) > 0){
               plot(x,"observations",...)
               #Plot realizations if not too many samples
               if((x@numSamples < 5) && (length(x@realizations)>0)){
@@ -34,8 +34,8 @@ setMethod("plot",
           function(x,y,...) {
             switch(y,
                    observations = {  #assuming one meas location
-                     if(length(x@observations[,1]) == x@numTimesteps){
-                      plot(1:x@numTimesteps,x@observations[,1],
+                     if(length(x@observations) == x@numTimesteps){
+                      plot(1:x@numTimesteps,x@observations,
                            main="Observations", xlab="time steps",
                            type="l",...)
                      }
@@ -43,8 +43,8 @@ setMethod("plot",
                    realizations = {
                      #.pardefault <- par(no.readonly = TRUE)
                      #par(mfrow=c())
-                     if(length(x@observations[,1]) == x@numTimesteps){  #Time series
-                       plot(1:x@numTimesteps,x@observations[,1],
+                     if(length(x@observations) == x@numTimesteps){  #Time series
+                       plot(1:x@numTimesteps,x@observations,
                             main="Observations+Realizations", xlab="time steps",
                             type="l",...)
                        samples <- 1:x@numSamples
@@ -64,12 +64,12 @@ setMethod("plot",
                                         col=c(1,1+samples),lty=1,bg="transparent", bty="n")
                        } else {  #Reduced
                          .pardefault <- par(no.readonly = TRUE)
-                         par(mfrow=c(ceiling(sqrt(length(x@observations[,1]))),
-                                     ceiling(length(x@observations[,1])/
-                                             ceiling(sqrt(length(x@observations[,1]))))))
+                         par(mfrow=c(ceiling(sqrt(length(x@observations))),
+                                     ceiling(length(x@observations)/
+                                             ceiling(sqrt(length(x@observations))))))
                          #par(oma=c(0,0,0,0))
                          #par(mar=c(1,1,1,1))
-                        for(param in 1:length(x@observations[,1])) {
+                        for(param in 1:length(x@observations)) {
                           graphics::hist(x@realizations[[1]][,param],
                                xlim=range(lapply(x@realizations,
                                                  function(sample){range(sample[,param])})),
@@ -80,7 +80,7 @@ setMethod("plot",
                           for(sample in 2:x@numSamples){
                             graphics::hist(x@realizations[[sample]][,param], add=TRUE,
                                  col=grDevices::adjustcolor(sample+1,alpha.f=0.2))
-                            abline(v=x@observations[param,1])
+                            abline(v=x@observations[param])
                           }
                         }
                          par(.pardefault)

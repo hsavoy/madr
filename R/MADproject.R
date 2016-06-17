@@ -26,11 +26,11 @@ MADproject <- setClass(
     numLocations = "numeric",
     numTimesteps = "numeric",
     numSamples   = "numeric",
-    observations = "matrix",
+    observations = "numeric",
     realizations   = "list",
     likelihoods = "list",
     posteriors = "list"
-  ),
+  )
 
   # Set the default values for the slots. (optional)
 #   prototype=list(

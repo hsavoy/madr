@@ -4,7 +4,7 @@
 \alias{readMAD}
 \title{Read the SQLite databases from MAD# into the MADproject object.}
 \usage{
-readMAD(proj)
+readMAD(proj, location)
 }
 \arguments{
 \item{proj}{The MADproject object with the slots \code{madname},

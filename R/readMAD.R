@@ -13,13 +13,13 @@ NULL
 #'    and \code{realizations} filled in from the MAD# databases.
 #'
 #' @export
-setGeneric("readMAD", function(proj) {
+setGeneric("readMAD", function(proj, location) {
   standardGeneric("readMAD")
 })
 
 setMethod("readMAD",
-          signature(proj="MADproject"),
-          function(proj) {
+          signature(proj="MADproject", location="numeric"),
+          function(proj, location) {
             message("I'm gonna read files!")
             #Setup database
             database <- paste(proj@xpath,"/",proj@madname,"_",proj@resultname,".xResult",sep="")
@@ -34,10 +34,12 @@ setMethod("readMAD",
             sqlvector=paste("select sv.value from  selectionvalues sv, likelihoodselecgroup s where sv.idselectionvalues= s.idselectionvalues   and s.idlikegroup=",1," order by sv.idselectionvalues;",sep='');
             res<- RSQLite::dbSendQuery(con,sqlvector)
             vector <- DBI::fetch(res, n=-1)
-            Observationvector <- vector$value
+            #Observationvector <- vector$value
+            proj@observations <- vector$value[(1:proj@numTimesteps) + (location-1)*proj@numTimesteps]
             RSQLite::dbClearResult(res)
-            proj@observations <- matrix(Observationvector,nrow=proj@numTimesteps,
-                                        ncol=proj@numLocations, byrow=FALSE)
+            #proj@observations <- matrix(Observationvector,nrow=proj@numTimesteps,
+            #                            ncol=proj@numLocations, byrow=FALSE)
+
             #Read realizations
             proj@realizations <- vector("list",proj@numSamples)
             for(sample in 1:proj@numSamples){
