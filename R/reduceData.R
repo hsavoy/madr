@@ -20,7 +20,7 @@ setGeneric("reduceData", function(proj, method, params, ...) {
 setMethod("reduceData",
           signature(proj="MADproject", method="function"), #just function
           function(proj, method) {
-            proj@observations <- as.matrix(match.fun(method)(proj@observations))
+            proj@observations <- match.fun(method)(proj@observations)
             proj@realizations <- lapply(proj@realizations,
                                         FUN=function(sample){
                                           as.matrix(apply(sample,1,match.fun(method)))
@@ -39,7 +39,7 @@ setMethod("reduceData",
                 nls.control(warnOnly=TRUE),
                 ...
             )
-            proj@observations <- as.matrix(coefficients(fit))
+            proj@observations <- coefficients(fit)
             proj@realizations <- lapply(proj@realizations,
                                         FUN=function(sample){
                                           t(apply(sample,1,function(realization){

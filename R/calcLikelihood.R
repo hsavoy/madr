@@ -33,7 +33,7 @@ setMethod("calcLikelihood",
                     subset <- 1:num_realz
                   }
                   proj@likelihoods[[i]][scount] <- np::npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]], #assuming Meas1
-                                               edat=t(as.matrix(proj@observations[data[[i]]])))$dens  #assuming Meas1
+                                               edat=as.matrix(proj@observations[data[[i]]]))$dens  #assuming Meas1
                 }
               } else {
                 message("Unknown inversion data type. See ?calcLikelihood")
@@ -55,7 +55,7 @@ setMethod("calcLikelihood",
                 subset <- 1:num_realz
               }
               proj@likelihoods[[1]][scount] <- np::npudens(tdat=proj@realizations[[samples[scount]]][subset,], #assuming Meas1
-                                                           edat=t(as.matrix(proj@observations)))$dens  #assuming Meas1
+                                                           edat=as.matrix(proj@observations))$dens  #assuming Meas1
             }
             return(proj)
           }
