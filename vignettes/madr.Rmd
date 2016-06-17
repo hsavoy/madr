@@ -34,7 +34,8 @@ library(np)
 ```
 ```{r}
 library(madr)
-data("pumping")
+#data("pumping")
+load("/Users/heathersavoy/GitHub/madr/data/pumping.RData")
 ```
 
 ## Viewing Data
@@ -74,7 +75,7 @@ plot(pumping.min, "posteriors")
 ```
 
 ```{r, results='hide'}
-pumping.matern <- reduceData(pumping, matern, init.matern, lower=c(-Inf,0,0.1), upper=c(0,100,3), algorithm="port")
+pumping.matern <- reduceData(pumping, matern, init.matern, lower=c(-Inf,1,0.1), upper=c(0,100,3), algorithm="port")
 ```
 ```{r, fig.width=7.2, fig.height=8}
 plot(pumping.matern, "realizations")

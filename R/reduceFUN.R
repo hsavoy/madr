@@ -15,7 +15,7 @@ matern <- function(x, params){
 init.matern <- function(x){
   params<- c()
   params[1] <- min(x)
-  params[2] <- 5 #tail(which(x > 0.99*min(x)),1)
+  params[2] <- min(10, tail(which(x > 0.3*min(x)),1))  #5
   params[3] <- 0.5
   return(params)
 }
