@@ -3,8 +3,7 @@ library(np)
 
 ## ------------------------------------------------------------------------
 library(madr)
-#data("pumping")
-load("/Users/heathersavoy/GitHub/madr/data/pumping.RData")
+data("pumping")
 
 ## ---- fig.width=7.2, fig.height=4----------------------------------------
 plot(pumping, "realizations")

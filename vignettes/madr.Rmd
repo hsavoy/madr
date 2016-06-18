@@ -34,8 +34,7 @@ library(np)
 ```
 ```{r}
 library(madr)
-#data("pumping")
-load("/Users/heathersavoy/GitHub/madr/data/pumping.RData")
+data("pumping")
 ```
 
 ## Viewing Data
@@ -97,9 +96,8 @@ test_convergence(pumping.matern, samples=2:4)
 ```
 
 ## Coming Soon
-Here are additional features that are planned for near-future development:
+Here are additional features that are planned for near-future development
 
-- More than one measurement location
-- Dimension reduction techniques so more than just time steps can be used for inversion
+- Additional dimension reduction techniques
 - Continuous priors/posteriors
 - Multiple random parameters

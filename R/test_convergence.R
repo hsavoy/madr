@@ -27,14 +27,17 @@ setMethod("test_convergence",
               temp <- calcLikelihood(proj, data, num_realz=rseq[rcount], samples=samples)
               likes[rcount,] <- temp@likelihoods[[1]]
             }
+            .pardefault <- par(no.readonly = TRUE)
+            par(xpd=TRUE)
             plot(NULL, xlim=range(rseq), ylim=range(log10(likes), na.rm=TRUE, finite=TRUE))
             for(scount in 1:length(samples)) {
               lines(rseq, log10(likes[,scount]), col=scount)
             }
             graphics::legend("top",legend=c("Obs.",
                                                  paste0("S",samples)),
-                             horiz=TRUE,
+                             horiz=TRUE, inset=c(0,-0.2),
                              col=c(1,1+samples),lty=1,bg="transparent", bty="n")
+            par(.pardefault)
           }
 )
 
@@ -51,11 +54,17 @@ setMethod("test_convergence",
               temp <- calcLikelihood(proj, num_realz=rseq[rcount], samples=samples)
               likes[rcount,] <- temp@likelihoods[[1]]
             }
+            .pardefault <- par(no.readonly = TRUE)
+            par(xpd=TRUE)
             plot(NULL, xlim=range(rseq), ylim=range(log10(likes), na.rm=TRUE, finite=TRUE),
                  xlab="Number of Realizations", ylab="log(likelihood)")
             for(scount in 1:length(samples)) {
               lines(rseq, log10(likes[,scount]),
                     col=grDevices::adjustcolor(samples[scount]+1,alpha.f=1))
             }
+            graphics::legend("top",legend=c(paste0("S",samples)),
+                             horiz=TRUE,inset=c(0,-0.2),
+                             col=1+samples,lty=1,bg="transparent", bty="n")
+            par(.pardefault)
           }
 )

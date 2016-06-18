@@ -50,7 +50,7 @@ setMethod("readMAD",
                 sql1=paste("select sv.idselectionvalues from  likelihoodselecgroup sv where  sv.idlikegroup=",1," order by sv.idselectionvalues",sep='');
                 res<- RSQLite::dbSendQuery(con,sql1)
                 zvectorid <- DBI::fetch(res, n=-1)
-                zvector=zvectorid$idselectionvalues
+                zvector=zvectorid$idselectionvalues[(1:proj@numTimesteps) + (location-1)*proj@numTimesteps]
                 RSQLite::dbClearResult(res)
                 counter=1
                 sqlverify=paste("select count(*) as numrealizations from resultselection r, resultid ri where r.idresult=ri.idresult and ri.sample=",sample," and r.idselectionvalues=",zvector[1],";",sep='');
