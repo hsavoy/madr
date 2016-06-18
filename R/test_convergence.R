@@ -31,6 +31,10 @@ setMethod("test_convergence",
             for(scount in 1:length(samples)) {
               lines(rseq, log10(likes[,scount]), col=scount)
             }
+            graphics::legend("top",legend=c("Obs.",
+                                                 paste0("S",samples)),
+                             horiz=TRUE,
+                             col=c(1,1+samples),lty=1,bg="transparent", bty="n")
           }
 )
 
