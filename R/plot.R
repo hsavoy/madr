@@ -41,8 +41,6 @@ setMethod("plot",
                      }
                     },
                    realizations = {
-                     #.pardefault <- par(no.readonly = TRUE)
-                     #par(mfrow=c())
                      if(length(x@observations) == x@numTimesteps){  #Time series
                        plot(1:x@numTimesteps,x@observations,
                             main="Observations+Realizations", xlab="time steps",
@@ -62,42 +60,94 @@ setMethod("plot",
                        graphics::legend("topright",legend=c("Obs.",
                                                             paste0("S",samples)),
                                         col=c(1,1+samples),lty=1,bg="transparent", bty="n")
-                       } else {  #Reduced
+                       } else if (x@numTimesteps == 1) { #steady
+                         .pardefault <- par(no.readonly = TRUE)
+                         total <- dim(x@priors)[2]
+                         par(mfrow=c(ceiling(sqrt(total)),
+                                     ceiling( total/ceiling( sqrt(total) ) )))
+                          for(location in 1:length(x@observations)) {
+                            plot(density(x@realizations[[1]][,location]),type="l",
+                                 xlim=range(lapply(x@realizations,
+                                                   function(sample){range(sample[,location])})),
+                                 col=grDevices::adjustcolor(2,alpha.f=1),
+                                 main="Location Realization Histograms",
+                                 xlab=paste("Location", location)
+                            )
+                             for(sample in 2:x@numSamples){
+                               dens <- density(x@realizations[[sample]][,location])
+                               lines(dens$x, dens$y,
+                                     col=grDevices::adjustcolor(sample+1,alpha.f=1))
+                             }
+                             abline(v=x@observations[location])
+                          }
+                     } else {  #Reduced
                          .pardefault <- par(no.readonly = TRUE)
                          par(mfrow=c(ceiling(sqrt(length(x@observations))),
                                      ceiling(length(x@observations)/
                                              ceiling(sqrt(length(x@observations))))))
-                         #par(oma=c(0,0,0,0))
-                         #par(mar=c(1,1,1,1))
                         for(param in 1:length(x@observations)) {
-                          graphics::hist(x@realizations[[1]][,param],
+                          plot(density(x@realizations[[1]][,param]),type="l",
                                xlim=range(lapply(x@realizations,
-                                                 function(sample){range(sample[,param])})),
-                               ylim=c(0,dim(x@realizations[[1]])[1]/2),
-                               xlab=paste("Parameter",param),
-                               col=grDevices::adjustcolor(2,alpha.f=0.2),
-                               main="Realization Parameter Histograms")
+                              function(sample){range(sample[,param])})),
+                              col=grDevices::adjustcolor(2,alpha.f=1),
+                              main="Realization Parameter Histograms",
+                              xlab=paste("Parameter", param)
+                              )
                           for(sample in 2:x@numSamples){
-                            graphics::hist(x@realizations[[sample]][,param], add=TRUE,
-                                 col=grDevices::adjustcolor(sample+1,alpha.f=0.2))
-                            abline(v=x@observations[param])
+                            dens <- density(x@realizations[[sample]][,param])
+                            lines(dens$x, dens$y,
+                                  col=grDevices::adjustcolor(sample+1,alpha.f=1))
                           }
+                          abline(v=x@observations[param])
+
                         }
+                         legend("left", legend=paste("Sample",1:x@numSamples),
+                                col=1+(1:x@numSamples))
                          par(.pardefault)
                        }
-
-                     #par(.pardefault)
                     },
-                   posteriors = {  #assumes small sample discrete distribtion
-                     for(i in 1:length(x@posteriors)){
-                       graphics::barplot(x@posteriors[[i]], main="Posteriors",
-                            names.arg=paste0("S",1:x@numSamples),
-                            col=grDevices::adjustcolor((1:x@numSamples)+1,alpha.f=0.2),
-                            ylim=c(0,1),
-                            ...
-                            )
+                   posteriors = {  #assumes small sample discrete distribution
+                     .pardefault <- par(no.readonly = TRUE)
+                     total <- x@numTheta + x@numAnchors
+                     par(mfrow=c(ceiling(sqrt(total)),
+                                 ceiling( total/ceiling( sqrt(total) ) )
+                     )
+                     )
+                     for(theta in 1:total){
+                       if(x@numSamples< 10){  #do discrete
+                         graphics::barplot(x@posteriors[[theta]][,1], main="Posteriors",
+                                           names.arg=paste0("S",1:x@numSamples),
+                                           col=grDevices::adjustcolor((1:x@numSamples)+1,alpha.f=0.2),
+                                           ylim=c(0,1),
+                                           ...
+                         )
+                       } else {  #do continuous
+                         graphics::plot(density(x@posteriors[[theta]][,1]), main="Posteriors",
+                                           #col=grDevices::adjustcolor((1:x@numSamples)+1,alpha.f=0.2),
+                                           #ylim=c(0,1),
+                                           ...
+                         )
+                       }
+                         if(length(x@truevalues) > 0) abline(v=x@truevalues[theta])
                      }
-                    }
+                    },
+                   priors = {  ### always doing histogram
+                     .pardefault <- par(no.readonly = TRUE)
+                     total <- dim(x@priors)[2]
+                     par(mfrow=c(ceiling(sqrt(total)),
+                              ceiling( total/ceiling( sqrt(total) ) )
+                              )
+                         )
+                     for(param in 1:total){
+                       graphics::hist(x@priors[,param], main=paste("Prior",param),
+                                      freq=FALSE,
+                                         #col=grDevices::adjustcolor(param+1,alpha.f=0.2),
+                                         #ylim=c(0,1),
+                                         ...
+                       )
+                     }
+                     par(.pardefault)
+                   }
                     )
           }
 )

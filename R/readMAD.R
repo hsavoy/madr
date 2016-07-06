@@ -30,6 +30,8 @@ setMethod("readMAD",
             proj@numLocations <- as.numeric(RSQLite::dbGetQuery( con,'select count(*) from selection' ))
             proj@numTimesteps <- as.numeric(RSQLite::dbGetQuery( con,'select count(*) from selectionvalues' ))/proj@numLocations
             proj@numSamples <- length(list.files(paste0(proj@xpath,proj@resultname)))
+            proj@numAnchors <- as.numeric(RSQLite::dbGetQuery( con,"SELECT count(typevar) FROM measure WHERE typevar LIKE 'Anchor_Type_A' "))
+            proj@numTheta <- abs(proj@numAnchors - as.numeric(RSQLite::dbGetQuery( con,"SELECT count(*) from (SELECT structuralname FROM priordata group by structuralname) ")))
             #Read observations
             sqlvector=paste("select sv.value from  selectionvalues sv, likelihoodselecgroup s where sv.idselectionvalues= s.idselectionvalues   and s.idlikegroup=",1," order by sv.idselectionvalues;",sep='');
             res<- RSQLite::dbSendQuery(con,sqlvector)
@@ -70,7 +72,16 @@ setMethod("readMAD",
                 RSQLite::dbDisconnect(consa);
               }
             }
-
+            #Read priors
+            proj@priors <- matrix(NA,ncol=proj@numTheta + proj@numAnchors, nrow=proj@numSamples)
+            tmp_params <- unlist(RSQLite::dbGetQuery( con,"SELECT DISTINCT fieldname FROM priordata"))
+            pcount <- 1
+            for(param in tmp_params){
+              proj@priors[,pcount] <- RSQLite::dbGetQuery( con,paste0("SELECT value FROM priordata WHERE fieldname like '",param,"'"))[1:proj@numSamples,1]
+              pcount <- pcount + 1
+            }
+            #Read true values
+            proj@truevalues <- as.numeric(unlist(RSQLite::dbGetQuery( con,"SELECT value FROM truevalues")))
             return(proj)
           }
           )

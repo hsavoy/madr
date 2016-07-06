@@ -17,10 +17,16 @@ setGeneric("calcPosterior", function(proj, likes) {
 setMethod("calcPosterior",
           signature(proj="MADproject"),
           function(proj) {
-            proj@posteriors <- vector("list", length(proj@likelihoods))
-            for (i in 1:length(proj@posteriors)){
-              ##assuming uniform discrete prioor
-              proj@posteriors[[i]] <- proj@likelihoods[[i]]/sum(proj@likelihoods[[i]])
+            proj@posteriors <- vector("list", proj@numTheta + proj@numAnchors) #length(proj@likelihoods))
+            for (theta in 1:length(proj@posteriors)){
+              ##assuming uniform discrete prior
+              #proj@posteriors[[theta]] <- proj@likelihoods[[i]]/sum(proj@likelihoods[[i]])
+              ##weighting priors
+              dens <- npudens(tdat=proj@priors[,theta],
+                      edat=proj@priors[,theta])$dens
+              proj@posteriors[[theta]] <- cbind(cbind(proj@priors[,theta],
+                                                      dens*proj@likelihoods[[1]]))
+              proj@posteriors[[theta]] <- proj@posteriors[[theta]]/sum(proj@posteriors[[theta]])
             }
             return(proj)
           }

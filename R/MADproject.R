@@ -26,9 +26,13 @@ MADproject <- setClass(
     numLocations = "numeric",
     numTimesteps = "numeric",
     numSamples   = "numeric",
+    numAnchors = "numeric",
+    numTheta = "numeric",
+    truevalues = "numeric",
     observations = "numeric",
-    realizations   = "list",
-    likelihoods = "list",
+    realizations   = "list",  #length numSamples, if numTimesteps > 1, then matrices inside
+    priors = "matrix",   #numSamples by (numTheta + numAnchors)
+    likelihoods = "list",  #
     posteriors = "list"
   )
 

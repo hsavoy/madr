@@ -13,6 +13,8 @@ NULL
 #'   as \code{data} the likelihood values
 #'   for each sample based on \code{data}.
 #'
+#' @importFrom np npudens
+#'
 #' @export
 setGeneric("calcLikelihood", function(proj, data, ...) {
   standardGeneric("calcLikelihood")
@@ -32,7 +34,7 @@ setMethod("calcLikelihood",
                   }else{
                     subset <- 1:num_realz
                   }
-                  proj@likelihoods[[i]][scount] <- np::npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]],
+                  proj@likelihoods[[i]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]],
                                                edat=t(as.matrix(proj@observations[data[[i]]])))$dens
                 }
               } else {
@@ -54,7 +56,7 @@ setMethod("calcLikelihood",
               }else{
                 subset <- 1:num_realz
               }
-              proj@likelihoods[[1]][scount] <- np::npudens(tdat=proj@realizations[[samples[scount]]][subset,],
+              proj@likelihoods[[1]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,],
                                                            edat=t(as.matrix(proj@observations)))$dens
             }
             return(proj)
