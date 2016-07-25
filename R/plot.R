@@ -20,7 +20,7 @@ setMethod("plot",
             if(length(x@observations) > 0){
               plot(x,"observations",...)
               #Plot realizations if not too many samples
-              if((x@numSamples < 5) && (length(x@realizations)>0)){
+              if((x@numSamples < 5)) { #&& (length(x@realizations)>0)){
                 plot(x,"realizations",...)
               }
             }
@@ -33,120 +33,83 @@ setMethod("plot",
           signature(x="MADproject", y="character"),
           function(x,y,...) {
             switch(y,
-                   observations = {  #assuming one meas location
+                   observations = {
                      if(length(x@observations) == x@numTimesteps){
                       plot(1:x@numTimesteps,x@observations,
                            main="Observations", xlab="time steps",
                            type="l",...)
+                      df <- data.frame(obs=x@observations,
+                                       time=1:length(x@observations))
+                      ggplot(df) + geom_line(aes(x=time,y=obs)) +
+                        ylab("zb Observation") + xlab("Time Steps")
                      }
                     },
                    realizations = {
+                     if(x@numSamples>6){
+                       return("Too many samples for plotting realizations!")
+                     }
                      if(length(x@observations) == x@numTimesteps){  #Time series
-                       plot(1:x@numTimesteps,x@observations,
-                            main="Observations+Realizations", xlab="time steps",
-                            type="l",...)
-                       samples <- 1:x@numSamples
-                       for(sample in samples){
-                         len <- x@numTimesteps
-                         diff1 <- apply(x@realizations[[sample]][,1:len],2,  #assumes one meas
-                                        stats::quantile,probs=.25, na.rm=TRUE)
-                         diff2 <- apply(x@realizations[[sample]][,1:len],2,
-                                        stats::quantile,probs=.75, na.rm=TRUE)
-                         graphics::polygon(c(1:len,len:1),
-                                           c(diff1,rev(diff2)),
-                                           col=grDevices::adjustcolor(sample+1,alpha.f=0.2),
-                                           border=NA)
-                       }
-                       graphics::legend("topright",legend=c("Obs.",
-                                                            paste0("S",samples)),
-                                        col=c(1,1+samples),lty=1,bg="transparent", bty="n")
-                       } else if (x@numTimesteps == 1) { #steady
-                         .pardefault <- par(no.readonly = TRUE)
-                         total <- dim(x@priors)[2]
-                         par(mfrow=c(ceiling(sqrt(total)),
-                                     ceiling( total/ceiling( sqrt(total) ) )))
-                          for(location in 1:length(x@observations)) {
-                            plot(density(x@realizations[[1]][,location]),type="l",
-                                 xlim=range(lapply(x@realizations,
-                                                   function(sample){range(sample[,location])})),
-                                 col=grDevices::adjustcolor(2,alpha.f=1),
-                                 main="Location Realization Histograms",
-                                 xlab=paste("Location", location)
-                            )
-                             for(sample in 2:x@numSamples){
-                               dens <- density(x@realizations[[sample]][,location])
-                               lines(dens$x, dens$y,
-                                     col=grDevices::adjustcolor(sample+1,alpha.f=1))
-                             }
-                             abline(v=x@observations[location])
-                          }
-                     } else {  #Reduced
-                         .pardefault <- par(no.readonly = TRUE)
-                         par(mfrow=c(ceiling(sqrt(length(x@observations))),
-                                     ceiling(length(x@observations)/
-                                             ceiling(sqrt(length(x@observations))))))
-                        for(param in 1:length(x@observations)) {
-                          plot(density(x@realizations[[1]][,param]),type="l",
-                               xlim=range(lapply(x@realizations,
-                              function(sample){range(sample[,param])})),
-                              col=grDevices::adjustcolor(2,alpha.f=1),
-                              main="Realization Parameter Histograms",
-                              xlab=paste("Parameter", param)
-                              )
-                          for(sample in 2:x@numSamples){
-                            dens <- density(x@realizations[[sample]][,param])
-                            lines(dens$x, dens$y,
-                                  col=grDevices::adjustcolor(sample+1,alpha.f=1))
-                          }
-                          abline(v=x@observations[param])
+                         diff <- dplyr::summarise(dplyr::group_by(x@realizations, sid, zid),
+                                   p25=quantile(value,probs=0.25),
+                                   p75=quantile(value,probs=0.75))
+                         diff$obs <- x@observations
 
-                        }
-                         legend("left", legend=paste("Sample",1:x@numSamples),
-                                col=1+(1:x@numSamples))
-                         par(.pardefault)
+                        plots <- dlply(diff, "sid", function(d){
+                          ggplot(d)  +
+                            geom_ribbon(aes(x=zid, ymin=p25,ymax=p75)) +
+                            geom_line(aes(x=zid,y=obs)) +
+                            guides(color="none") +
+                            xlab("Time steps") +
+                            ylab(paste("zb, Observed and Sample",d$sid))
+                          }
+                        )
+                        multiplot(plotlist=plots,cols=round(sqrt(x@numSamples)))
+                       } else if (x@numTimesteps == 1) { #steady
+                         obs <- data.frame(zid=1:length(x@observations), obs=x@observations)
+                         plots <- dlply(merge(x@realizations,obs), "zid",
+                                        function(d){
+                                          ggplot(d, aes(x=value,fill=sid))  +
+                                            geom_density(alpha=0.25) +
+                                            geom_vline(aes(xintercept=obs))
+                                        }
+                         )
+                         multiplot(plotlist=plots,cols=round(sqrt(length(x@observations))))
+                     } else {  #Reduced
+                        obs <- data.frame(zid=1:length(x@observations), obs=x@observations)
+                         plots <- dlply(merge(x@realizations,obs), "zid",
+                                        function(d){
+                                          ggplot(d, aes(x=value, group=as.factor(sid),
+                                                        colour=as.factor(sid)))  +
+                                            geom_density(alpha=0.25) +
+                                            scale_colour_discrete(name = "Sample ID") +
+                                            geom_vline(aes(xintercept=obs))
+                                        }
+                         )
+                         multiplot(plotlist=plots,cols=round(sqrt(x@numTheta+x@numAnchors)))
                        }
                     },
-                   posteriors = {  #assumes small sample discrete distribution
-                     .pardefault <- par(no.readonly = TRUE)
-                     total <- x@numTheta + x@numAnchors
-                     par(mfrow=c(ceiling(sqrt(total)),
-                                 ceiling( total/ceiling( sqrt(total) ) )
+                   posteriors = {
+                     plots <- dlply(merge(x@posteriors,x@truevalues), "tid",
+                                    function(d){
+                                      ggplot(d, aes(x=priorvalue, weight=post))  +
+                                        geom_density(weight=1, fill=NA, colour="red") +
+                                        geom_density(fill=NA, colour="blue") +
+                                        geom_vline(aes(xintercept = value), na.rm=TRUE) +
+                                        xlab(unique(d$name))
+                                    }
                      )
-                     )
-                     for(theta in 1:total){
-                       if(x@numSamples< 10){  #do discrete
-                         graphics::barplot(x@posteriors[[theta]][,1], main="Posteriors",
-                                           names.arg=paste0("S",1:x@numSamples),
-                                           col=grDevices::adjustcolor((1:x@numSamples)+1,alpha.f=0.2),
-                                           ylim=c(0,1),
-                                           ...
-                         )
-                       } else {  #do continuous
-                         graphics::plot(density(x@posteriors[[theta]][,1]), main="Posteriors",
-                                           #col=grDevices::adjustcolor((1:x@numSamples)+1,alpha.f=0.2),
-                                           #ylim=c(0,1),
-                                           ...
-                         )
-                       }
-                         if(length(x@truevalues) > 0) abline(v=x@truevalues[theta])
-                     }
+                     multiplot(plotlist=plots,cols=round(sqrt(x@numTheta+x@numAnchors)))
                     },
                    priors = {  ### always doing histogram
-                     .pardefault <- par(no.readonly = TRUE)
-                     total <- dim(x@priors)[2]
-                     par(mfrow=c(ceiling(sqrt(total)),
-                              ceiling( total/ceiling( sqrt(total) ) )
-                              )
-                         )
-                     for(param in 1:total){
-                       graphics::hist(x@priors[,param], main=paste("Prior",param),
-                                      freq=FALSE,
-                                         #col=grDevices::adjustcolor(param+1,alpha.f=0.2),
-                                         #ylim=c(0,1),
-                                         ...
-                       )
-                     }
-                     par(.pardefault)
+                     plots <- dlply(x@priors, "tid",
+                                    function(d){
+                                      ggplot(d, aes(priorvalue,y=priordens))  +
+                                      geom_bar(stat="identity", width=1/length(d$priorvalue)) +
+                                        geom_density(aes(priorvalue,..density..),fill=NA, colour="red")+
+                                        xlab(unique(d$name)) + ylab("density")
+                                    }
+                     )
+                     suppressWarnings(multiplot(plotlist=plots,cols=round(sqrt(x@numTheta+x@numAnchors))))
                    }
                     )
           }

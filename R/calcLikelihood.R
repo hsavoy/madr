@@ -30,12 +30,16 @@ setMethod("calcLikelihood",
               if(names(data)[i]=="timesteps"){
                 for(scount in 1:length(samples)){
                   if(is.na(num_realz)){
-                    subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
+                    #subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
+                    unique(subset(proj@realizations,sid==scount)$rid)
                   }else{
-                    subset <- 1:num_realz
+                    rsubset <- 1:num_realz
                   }
-                  proj@likelihoods[[i]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]],
-                                               edat=t(as.matrix(proj@observations[data[[i]]])))$dens
+                  #proj@likelihoods[[i]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]],
+                  #                             edat=t(as.matrix(proj@observations[data[[i]]])))$dens
+                  realz <- dcast(subset(proj@realizations,sid==scount),rid~zid,sum)[,-1]
+                  proj@likelihoods[[1]][scount] <- npudens(tdat=realz[rsubset,data[[i]]],
+                                                           edat=as.data.frame(t(proj@observations)))$dens
                 }
               } else {
                 message("Unknown inversion data type. See ?calcLikelihood")
@@ -47,18 +51,37 @@ setMethod("calcLikelihood",
 
 setMethod("calcLikelihood",
           signature(proj="MADproject"),
-          function(proj, num_realz=NA, samples=1:proj@numSamples) {
-            proj@likelihoods <- vector("list", 1)
-            proj@likelihoods[[1]] <- vector("numeric", length(samples))
-            for(scount in 1:length(samples)){
-              if(is.na(num_realz)){
-                subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
-              }else{
-                subset <- 1:num_realz
-              }
-              proj@likelihoods[[1]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,],
-                                                           edat=t(as.matrix(proj@observations)))$dens
-            }
+          function(proj, num_realz=max(proj@realizations$rid), samples=1:proj@numSamples) {
+            #proj@likelihoods <- vector("list", 1)
+            #proj@likelihoods[[1]] <- vector("numeric", length(samples))
+            # for(scount in 1:length(samples)){
+            #   if(is.na(num_realz)){
+            #     #subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
+            #     rsubset <- unique(subset(proj@realizations,sid==scount)$rid)
+            #   }else{
+            #     rsubset <- 1:num_realz
+            #   }
+            #   #proj@likelihoods[[1]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,],
+            #   #                                             edat=t(as.matrix(proj@observations)))$dens
+            #
+            #
+            # }
+            use <- subset(proj@realizations, sid %in% samples & rid <= num_realz)
+            cl <- makeCluster(4)
+            registerDoParallel(cl)
+            suppressWarnings(proj@likelihoods <- data.frame(sid=unique(use$sid),
+                                           like=daply(use, .(sid), npLike, obs=proj@observations,
+                                      .parallel = TRUE, .paropts=list(.packages=c("np","reshape2"),
+                                                                      .export=c("proj")
+                                                                      )
+                                      )
+            ))
+            stopCluster(cl)
             return(proj)
           }
 )
+
+npLike <- function(realz, obs){
+  return(npudens(tdat=dcast(realz,rid~zid,sum)[,-1],
+                 edat=as.data.frame(t(obs)))$dens)
+}

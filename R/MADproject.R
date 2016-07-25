@@ -19,7 +19,7 @@ MADproject <- setClass(
 
   # Define the slots
   slots = c(
-    projectname = "character",
+    #projectname = "character",
     madname = "character",
     resultname = "character",
     xpath = "character",
@@ -28,12 +28,13 @@ MADproject <- setClass(
     numSamples   = "numeric",
     numAnchors = "numeric",
     numTheta = "numeric",
-    truevalues = "numeric",
+    truevalues = "data.frame",
     observations = "numeric",
-    realizations   = "list",  #length numSamples, if numTimesteps > 1, then matrices inside
-    priors = "matrix",   #numSamples by (numTheta + numAnchors)
-    likelihoods = "list",  #
-    posteriors = "list"
+    #realizations   = "list",  #length numSamples, if numTimesteps > 1, then matrices inside
+    realizations = "data.frame",
+    priors = "data.frame",   #numSamples by (numTheta + numAnchors)
+    likelihoods = "data.frame",  #
+    posteriors = "data.frame"
   )
 
   # Set the default values for the slots. (optional)

@@ -20,7 +20,6 @@ setGeneric("readMAD", function(proj, location) {
 setMethod("readMAD",
           signature(proj="MADproject", location="numeric"),
           function(proj, location) {
-            message("I'm gonna read files!")
             #Setup database
             database <- paste(proj@xpath,"/",proj@madname,"_",proj@resultname,".xResult",sep="")
             datasample <- paste(proj@xpath,"/",proj@resultname,"/",proj@madname,"_",proj@resultname,sep="")
@@ -29,7 +28,7 @@ setMethod("readMAD",
             #Read project specifics
             proj@numLocations <- as.numeric(RSQLite::dbGetQuery( con,'select count(*) from selection' ))
             proj@numTimesteps <- as.numeric(RSQLite::dbGetQuery( con,'select count(*) from selectionvalues' ))/proj@numLocations
-            proj@numSamples <- length(list.files(paste0(proj@xpath,proj@resultname)))
+            proj@numSamples <- length(list.files(paste0(proj@xpath,proj@resultname,"/")))
             proj@numAnchors <- as.numeric(RSQLite::dbGetQuery( con,"SELECT count(typevar) FROM measure WHERE typevar LIKE 'Anchor_Type_A' "))
             proj@numTheta <- abs(proj@numAnchors - as.numeric(RSQLite::dbGetQuery( con,"SELECT count(*) from (SELECT structuralname FROM priordata group by structuralname) ")))
             #Read observations
@@ -43,9 +42,9 @@ setMethod("readMAD",
             #                            ncol=proj@numLocations, byrow=FALSE)
 
             #Read realizations
-            proj@realizations <- vector("list",proj@numSamples)
+            #proj@realizations <- vector("list",proj@numSamples)
             for(sample in 1:proj@numSamples){
-              dbs=paste(datasample,sample,".xdata",sep='');
+              dbs=paste(datasample,sample,".xdata",sep='')
               if (file.exists(dbs)){
                 consa <- RSQLite::dbConnect(drv, dbname =dbs)
 
@@ -58,30 +57,58 @@ setMethod("readMAD",
                 sqlverify=paste("select count(*) as numrealizations from resultselection r, resultid ri where r.idresult=ri.idresult and ri.sample=",sample," and r.idselectionvalues=",zvector[1],";",sep='');
                 numrea<- RSQLite::dbGetQuery(consa,sqlverify)[[1]]
 
-                proj@realizations[[sample]] <-  array(0,c(numrea,length(zvector)))
+                tmp <-  array(0,c(numrea,length(zvector)))
 
                 for(i in zvector){
                   sql2=paste("select r.value  from resultselection r, resultid ri where r.idresult=ri.idresult and ri.sample=",sample," and r.idselectionvalues=",i,"  order by ri.realization limit ", numrea,";",sep='');
                   res<- RSQLite::dbSendQuery(consa,sql2);
                   realizations<- DBI::fetch(res, n=-1);
                   value= realizations$value;
-                  proj@realizations[[sample]][,counter]=value;
-                  counter=counter+1;
-                  RSQLite::dbClearResult(res);
+                  tmp[,counter]=value
+                  counter=counter+1
+                  RSQLite::dbClearResult(res)
                 }
-                RSQLite::dbDisconnect(consa);
+                RSQLite::dbDisconnect(consa)
+
+                proj@realizations <- rbind(proj@realizations,
+                                           data.frame(sid=rep(sample,nrow(tmp)*ncol(tmp)),
+                                                      rid=rep(1:nrow(tmp),times=ncol(tmp)),
+                                                      zid=rep(1:ncol(tmp),each=nrow(tmp)),
+                                                      #ztype=,
+                                                      value=as.vector(tmp)
+                                                      )
+                                           )
               }
             }
             #Read priors
-            proj@priors <- matrix(NA,ncol=proj@numTheta + proj@numAnchors, nrow=proj@numSamples)
-            tmp_params <- unlist(RSQLite::dbGetQuery( con,"SELECT DISTINCT fieldname FROM priordata"))
-            pcount <- 1
-            for(param in tmp_params){
-              proj@priors[,pcount] <- RSQLite::dbGetQuery( con,paste0("SELECT value FROM priordata WHERE fieldname like '",param,"'"))[1:proj@numSamples,1]
-              pcount <- pcount + 1
-            }
+            param.names <- as.character(unlist(RSQLite::dbGetQuery( con,"SELECT DISTINCT fieldname FROM priordata")))
+            priordata <- as.data.frame(t(adply(param.names, .margin=1, .id=NULL,
+                                function(name){
+                    return(RSQLite::dbGetQuery( con,paste0("SELECT value FROM priordata WHERE fieldname like '",name,"'"))[1:proj@numSamples,1])
+                  }
+            )))
+            priordata$sid <- 1:proj@numSamples
+            priordata <- melt(priordata, "sid")
+            #names(priordata) <- c("sid","tid","priorvalue")
+            tmp <- as.data.frame(dlply(priordata, .(variable), function(param){
+              npudens(tdat=param$value,
+                      edat=param$value)$dens
+            }))
+
+
+            tmp$sid <- 1:proj@numSamples
+            tmp2 <- melt(tmp,"sid")
+            #names(tmp2) <- c("sid", "tid", "priordens")
+            tmp2$tid <- unlist(lapply(strsplit(as.character(tmp2$variable), "V"),
+                                      function(x){x[-1]}))
+            #tmp2 <- dplyr::mutate(tmp2, name=param.names[tid])
+            proj@priors <- cbind(tmp2[,-2],name=param.names[as.numeric(tmp2$tid)],
+                                 priorvalue=priordata$value)
+            names(proj@priors)[2] <- "priordens"
+
             #Read true values
-            proj@truevalues <- as.numeric(unlist(RSQLite::dbGetQuery( con,"SELECT value FROM truevalues")))
+            tvals <- as.numeric(unlist(RSQLite::dbGetQuery( con,"SELECT value FROM truevalues")))
+            proj@truevalues <- data.frame(tid=1:length(tvals), value=tvals)
             return(proj)
           }
           )
