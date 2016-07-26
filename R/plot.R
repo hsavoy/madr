@@ -10,6 +10,18 @@ NULL
 #' @param ... not supported
 #' @return NULL.
 #'
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_ribbon
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 geom_bar
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 xlab
+#' @importFrom ggplot2 ylab
+#' @importFrom Rmisc multiplot
+#' @importFrom plyr dlply
+#'
 #' @export
 setGeneric("plot")
 
@@ -54,7 +66,7 @@ setMethod("plot",
                                    p75=quantile(value,probs=0.75))
                          diff$obs <- x@observations
 
-                        plots <- dlply(diff, "sid", function(d){
+                        plots <- plyr::dlply(diff, "sid", function(d){
                           ggplot(d)  +
                             geom_ribbon(aes(x=zid, ymin=p25,ymax=p75)) +
                             geom_line(aes(x=zid,y=obs)) +

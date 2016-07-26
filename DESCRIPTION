@@ -16,7 +16,10 @@ Imports:
     DBI,
     methods,
     graphics,
-    stats
+    stats,
+    ggplot2,
+    plyr,
+    dplyr
 Collate:
     'madr.R'
     'MADproject.R'

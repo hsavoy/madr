@@ -33,8 +33,10 @@ This vingnette will step through an example of applying `madr` using the dataset
 library(np)
 ```
 ```{r}
+library(devtools)
+install_github("hsavoy/madr")
 library(madr)
-data("pumping")
+data(pumping)
 ```
 
 ## Viewing Data
