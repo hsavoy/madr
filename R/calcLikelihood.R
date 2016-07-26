@@ -14,6 +14,7 @@ NULL
 #'   for each sample based on \code{data}.
 #'
 #' @importFrom np npudens
+#' @importFrom plyr daply
 #'
 #' @export
 setGeneric("calcLikelihood", function(proj, data, ...) {
@@ -21,30 +22,42 @@ setGeneric("calcLikelihood", function(proj, data, ...) {
 })
 
 setMethod("calcLikelihood",
-          signature(proj="MADproject", data="list"),
+          signature(proj="MADproject", data="numeric"),
           function(proj, data, num_realz=NA, samples=1:proj@numSamples) {
-            proj@likelihoods <- vector("list", length(data))
-            for (i in 1:length(data)){
-              proj@likelihoods[[i]] <- vector("numeric", length(samples))
-              names(proj@likelihoods)[i] <- paste0(names(data)[i],data[[i]])
-              if(names(data)[i]=="timesteps"){
-                for(scount in 1:length(samples)){
-                  if(is.na(num_realz)){
-                    #subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
-                    unique(subset(proj@realizations,sid==scount)$rid)
-                  }else{
-                    rsubset <- 1:num_realz
-                  }
-                  #proj@likelihoods[[i]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]],
-                  #                             edat=t(as.matrix(proj@observations[data[[i]]])))$dens
-                  realz <- dcast(subset(proj@realizations,sid==scount),rid~zid,sum)[,-1]
-                  proj@likelihoods[[1]][scount] <- npudens(tdat=realz[rsubset,data[[i]]],
-                                                           edat=as.data.frame(t(proj@observations)))$dens
-                }
-              } else {
-                message("Unknown inversion data type. See ?calcLikelihood")
-              }
-            }
+            # proj@likelihoods <- vector("list", length(data))
+            # for (i in 1:length(data)){
+            #   proj@likelihoods[[i]] <- vector("numeric", length(samples))
+            #   names(proj@likelihoods)[i] <- paste0(names(data)[i],data[[i]])
+            #   if(names(data)[i]=="timesteps"){
+            #     for(scount in 1:length(samples)){
+            #       if(is.na(num_realz)){
+            #         #subset <- 1:(dim(proj@realizations[[samples[scount]]])[1])
+            #         unique(subset(proj@realizations,sid==scount)$rid)
+            #       }else{
+            #         rsubset <- 1:num_realz
+            #       }
+            #       #proj@likelihoods[[i]][scount] <- npudens(tdat=proj@realizations[[samples[scount]]][subset,data[[i]]],
+            #       #                             edat=t(as.matrix(proj@observations[data[[i]]])))$dens
+            #       realz <- dcast(subset(proj@realizations,sid==scount),rid~zid,sum)[,-1]
+            #       proj@likelihoods[[1]][scount] <- npudens(tdat=realz[rsubset,data[[i]]],
+            #                                                edat=as.data.frame(t(proj@observations)))$dens
+            #     }
+            #   } else {
+            #     message("Unknown inversion data type. See ?calcLikelihood")
+            #   }
+            # }
+            # return(proj)
+            use <- subset(proj@realizations, sid %in% samples & rid <= num_realz & zid %in% data)
+            cl <- parallel::makeCluster(4)
+            doParallel::registerDoParallel(cl)
+            suppressWarnings(proj@likelihoods <- data.frame(sid=unique(use$sid),
+                                                            like=daply(use, .(sid), npLike, obs=proj@observations[data],
+                                                                       .parallel = TRUE, .paropts=list(.packages=c("np","reshape2"),
+                                                                                                       .export=c("proj")
+                                                                       )
+                                                            )
+            ))
+            stopCluster(cl)
             return(proj)
           }
 )
@@ -67,8 +80,8 @@ setMethod("calcLikelihood",
             #
             # }
             use <- subset(proj@realizations, sid %in% samples & rid <= num_realz)
-            cl <- makeCluster(4)
-            registerDoParallel(cl)
+            cl <- parallel::makeCluster(4)
+            doParallel::registerDoParallel(cl)
             suppressWarnings(proj@likelihoods <- data.frame(sid=unique(use$sid),
                                            like=daply(use, .(sid), npLike, obs=proj@observations,
                                       .parallel = TRUE, .paropts=list(.packages=c("np","reshape2"),
