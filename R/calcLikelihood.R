@@ -15,6 +15,7 @@ NULL
 #'
 #' @importFrom np npudens
 #' @importFrom plyr daply
+#' @importFrom reshape2 dcast
 #'
 #' @export
 setGeneric("calcLikelihood", function(proj, data, ...) {

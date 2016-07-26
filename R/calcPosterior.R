@@ -32,7 +32,7 @@ setMethod("calcPosterior",
                               proj@priors,
                               proj@likelihoods)
             postdata <- dplyr::mutate(postdata, prod=priordens*like)
-            products <- dplyr::summarise(group_by(postdata, tid), ptotal=sum(prod))
+            products <- dplyr::summarise(dplyr::group_by(postdata, tid), ptotal=sum(prod))
             postdata <- dplyr::mutate(merge(postdata,products), post=prod/ptotal)
             proj@posteriors <- subset(postdata,select=c(sid,tid,name,priorvalue,post))
             return(proj)
