@@ -3,14 +3,39 @@ NULL
 
 #' An S4 class to represent a MAD project
 #'
-#' @slot numLocations A length-one numeric vector for the number of measurement locations
-#' @slot numTimesteps A length-one numeric vector for the number of time steps in series
-#' @slot numSamples A length-one numeric vector for the number of samples
-#' @slot observations A numeric \code{numTimesteps}-by-\code{numLocations} matrix
-#'   for the observations at the m
-#' @slot realizations A list of length \code{numSamples} with each element containing
-#'   a numeric (number of realizations)-by-\code{numLocations*numTimesteps} matrix
-#'   to hold the ensemble of simulated measurements.
+#' @slot madname Character string, the name of the MAD#
+#' project
+#' @slot resultname Character string, the name of the MAD#
+#' project's result
+#' @slot xpath Character string, the path where to find the
+#' MAD# project's result
+#' @slot numLocations A numeric value for the number of
+#' measurement locations
+#' @slot numTimesteps A numeric value for the number of
+#' time steps in series
+#' @slot numSamples A numeric value for the number of
+#' samples
+#' @slot numAnchors A numeric value for the number of
+#' local parameters to be inferred
+#' @slot numTheta A numeric value for the number of
+#' global parameters to be inferred
+#' @slot truevalues A numeric vector of length
+#' \code{numAnchors+numTheta} that contains
+#' the true values of the parameters being inferred,
+#' if known (i.e. for validation)
+#' @slot observations A numeric vector containing the
+#' observed values of inversion data
+#' @slot realizations A data.frame containing the the
+#' ensemble of simulated inversion data
+#' for each sample
+#' @slot priors A data.frame containing the values sampled
+#' from the priors for each parameter to be inferred plus
+#' estimated marginal density
+#' @slot likelihoods A data.frame of likelihood values
+#' calculated for each sample
+#' @slot posteriors A data.frame containing the posterior
+#' values estimated for each sample of each parameter
+#'
 #'
 #' @export
 MADproject <- setClass(
@@ -30,37 +55,10 @@ MADproject <- setClass(
     numTheta = "numeric",
     truevalues = "data.frame",
     observations = "numeric",
-    #realizations   = "list",  #length numSamples, if numTimesteps > 1, then matrices inside
     realizations = "data.frame",
-    priors = "data.frame",   #numSamples by (numTheta + numAnchors)
-    likelihoods = "data.frame",  #
+    priors = "data.frame",
+    likelihoods = "data.frame",
     posteriors = "data.frame"
   )
-
-  # Set the default values for the slots. (optional)
-#   prototype=list(
-#     numLocations = 1,
-#     numTimesteps = 1,
-#     numSamples   = 2,
-#     observations = matrix(0,nrow=numTimesteps,ncol=numLocations),
-#     realizations = vector("list", numSamples)
-#   ),
-
-  # Make a function that can test to see if the data is consistent.
-  # This is not called if you have an initialize function defined!
-#   validity=function(object)
-#   {
-#     ##ADD file checks
-#     if(numLocations<1)  {
-#       return("Need at least one Type-B measurement location.")
-#     }
-#     if(numTimesteps<1) {
-#       return("Need at least one time step.")  #Or put in steady-state check
-#     }
-#     if(numSamples<2)  {
-#       return("Need at least two samples.")
-#     }
-#     return(TRUE)
-#   }
 
 )

@@ -2,23 +2,35 @@
 % Please edit documentation in R/calcLikelihood.R
 \name{calcLikelihood}
 \alias{calcLikelihood}
-\title{Calculate the likelihood for a MADproject object.}
+\title{Calculate the likelihood for the samples in a MADproject object.}
 \usage{
-calcLikelihood(proj, data, ...)
+calcLikelihood(proj, dsubset, ...)
 }
 \arguments{
 \item{proj}{The MADproject object with data read from the MAD# databases.}
 
-\item{data}{The kind of data to use for the likelihood calculations.}
+\item{dsubset}{The subset of inversion data to use for the likelihood
+calculations.}
+
+\item{num_realz}{The number of realizations to use in the likelihood
+calculation (defaults to all in the \code{realizations} slot)}
+
+\item{samples}{A vector of sample IDs for which to calculate
+likelihood values (defaults to all available in the
+\code{realizations} slot)}
 }
 \value{
-proj The updated MADproject object with a list of matching length
-  as \code{data} the likelihood values
-  for each sample based on \code{data}.
+proj The updated MADproject object with a filled
+\code{likelihood} slot.
 }
 \description{
 \code{calcLikelihood} returns the likelihood values based on the
-observation and realization data in MADproject and the requested
-inversion data type \code{data}.
+observation and realization data in MADproject or, optionally,
+a subset thereof.
+}
+\details{
+The likelihood calculation utilizes the \pkg{np} package for non-
+parametric density estimation with all inversion data as dependent (i.e.
+multivariate likelihood distributions are estimated).
 }
 

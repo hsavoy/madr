@@ -1,13 +1,14 @@
 #' @include MADproject.R
 NULL
 
-#' Calculate the posterior for a MADproject object.
+#' Calculate the posterior for a \code{MADproject} object.
 #'
-#' \code{calcPosterior} returns the posterior values ...
+#' \code{calcPosterior} returns the posterior values for each sample
 #'
-#' @param proj The MADproject object with data read from the MAD# databases.
-#' @param likes The likelihood values.
-#' @return NULL.
+#' @param proj The \code{MADproject} object with the \code{likelihood}
+#' slot filled.
+#' @return proj An updated \code{MADproject} object with the
+#' \code{posterior} slot filled.
 #'
 #' @export
 setGeneric("calcPosterior", function(proj, likes) {
@@ -17,19 +18,7 @@ setGeneric("calcPosterior", function(proj, likes) {
 setMethod("calcPosterior",
           signature(proj="MADproject"),
           function(proj) {
-            # proj@posteriors <- vector("list", proj@numTheta + proj@numAnchors) #length(proj@likelihoods))
-            # for (theta in 1:length(proj@posteriors)){
-            #   ##assuming uniform discrete prior
-            #   #proj@posteriors[[theta]] <- proj@likelihoods[[i]]/sum(proj@likelihoods[[i]])
-            #   ##weighting priors
-            #   dens <- npudens(tdat=proj@priors[proj@likelihoods$sid,theta],
-            #           edat=proj@priors[proj@likelihoods$sid,theta])$dens
-            #   proj@posteriors[[theta]] <- dens*proj@likelihoods$like #[[1]]
-            #   proj@posteriors[[theta]] <- proj@posteriors[[theta]]/sum(proj@posteriors[[theta]])
-            # }
-            postdata <- merge(#expand.grid(sid=proj@likelihoods$sid,
-                              #             tid=1:(proj@numTheta + proj@numAnchors)),
-                              proj@priors,
+            postdata <- merge(proj@priors,
                               proj@likelihoods)
             postdata <- dplyr::mutate(postdata, prod=priordens*like)
             products <- dplyr::summarise(dplyr::group_by(postdata, tid), ptotal=sum(prod))

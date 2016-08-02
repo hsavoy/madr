@@ -2,21 +2,24 @@
 % Please edit documentation in R/plot.R
 \name{plot}
 \alias{plot}
-\title{Plot the MADproject object}
+\title{Plot the data contained in MADproject object slots.}
 \usage{
 plot(x, y, ...)
 }
 \arguments{
 \item{x}{The MADproject object}
 
-\item{y}{not supported}
-
-\item{...}{not supported}
-}
-\value{
-NULL.
+\item{y}{character string from the following options: "observations",
+"realizations", "priors", or "posteriors"}
 }
 \description{
-\code{plot.MADproject} plots ...
+\code{plot} plots the data contained in various
+slots of the provided MADproject. If no specific slot is
+specified, all slots that can be plotted will be.
+}
+\details{
+All plots utilize \pkg{ggplot2} plotting functions. The slots
+that can be plotted are \code{priors}, \code{observations},
+\code{realizations}, and \code{posteriors}.
 }
 

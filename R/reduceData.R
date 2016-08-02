@@ -2,15 +2,25 @@
 NULL
 
 #' Apply the requested dimension reduction technique to the
-#' inversion data for the given MADproject
+#' inversion data for the given \code{MADproject} object
 #'
-#' \code{reduceData} returns ...
+#' \code{reduceData} returns a modifed \code{MADproject}
+#' object where the \code{observations} and \code{realizations}
+#' slots are replaced
 #'
-#' @param proj ...
-#' @param method ...
-#' @param params ...
+#' @param proj \code{MADproject} object that has been filled by
+#' MAD# databases
+#' @param method function to apply to data
+#' @param params function for estimating the initial values of
+#' the parameters of \code{method} based on the data, if
+#' \code{method} has parameters
+#' @param ... addtional arguments as needed for \code{nls} to
+#' fit \code{method} to the data
 #'
-#' @return proj
+#' @return proj \code{MADproject} object with reduced dimensions
+#' for inversion
+#'
+#' @importFrom plyr ddply
 #'
 #' @export
 setGeneric("reduceData", function(proj, method, params, ...) {
@@ -18,14 +28,9 @@ setGeneric("reduceData", function(proj, method, params, ...) {
 })
 
 setMethod("reduceData",
-          signature(proj="MADproject", method="function"), #just function
+          signature(proj="MADproject", method="function"),
           function(proj, method) {
             proj@observations <- match.fun(method)(proj@observations)
-            # proj@realizations <- lapply(proj@realizations,
-            #                             FUN=function(sample){
-            #                               as.matrix(apply(sample,1,match.fun(method)))
-            #                             }
-            #                             )
             reduced <- ddply(proj@realizations, .(sid,rid),
                                        function(df){match.fun(method)(df$value)}
                                        )
@@ -38,7 +43,7 @@ setMethod("reduceData",
 )
 
 setMethod("reduceData",
-          signature(proj="MADproject", method="function", params="function"), #then fit w/ params
+          signature(proj="MADproject", method="function", params="function"),
           function(proj, method, params, ...) {
             fit <- nls(y~match.fun(method)(t,init.params),
                 data=data.frame(t=1:proj@numTimesteps,y=proj@observations),
@@ -47,22 +52,6 @@ setMethod("reduceData",
                 ...
             )
             proj@observations <- coefficients(fit)
-            # proj@realizations <- lapply(proj@realizations,
-            #                             FUN=function(sample){
-            #                               t(apply(sample,1,function(realization){
-            #                                 fit <- nls(y~match.fun(method)(t,init.params),
-            #                                            data=data.frame(t=1:proj@numTimesteps,
-            #                                                            y=realization),
-            #                                            start=list(init.params=
-            #                                                         match.fun(params)(realization)),
-            #                                            nls.control(warnOnly=TRUE),
-            #                                            ...
-            #                                 )
-            #                                 return(coefficients(fit))
-            #                               }
-            #                               ))
-            #                             }
-            #                             )
             reduced <- ddply(proj@realizations, .(sid,rid),
                                         function(df){
                                             fit <- nls(y~match.fun(method)(t,init.params),
@@ -78,7 +67,7 @@ setMethod("reduceData",
                                             return(coeffs)
                                         }
             )
-            reduced <- melt(reduced, c("sid","rid"))
+            reduced <- reshape2::melt(reduced, c("sid","rid"))
             names(reduced)[3] <- "zid"
             proj@realizations <- reduced
             return(proj)

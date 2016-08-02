@@ -3,21 +3,30 @@
 \name{reduceData}
 \alias{reduceData}
 \title{Apply the requested dimension reduction technique to the
-inversion data for the given MADproject}
+inversion data for the given \code{MADproject} object}
 \usage{
 reduceData(proj, method, params, ...)
 }
 \arguments{
-\item{proj}{...}
+\item{proj}{\code{MADproject} object that has been filled by
+MAD# databases}
 
-\item{method}{...}
+\item{method}{function to apply to data}
 
-\item{params}{...}
+\item{params}{function for estimating the initial values of
+the parameters of \code{method} based on the data, if
+\code{method} has parameters}
+
+\item{...}{addtional arguments as needed for \code{nls} to
+fit \code{method} to the data}
 }
 \value{
-proj
+proj \code{MADproject} object with reduced dimensions
+for inversion
 }
 \description{
-\code{reduceData} returns ...
+\code{reduceData} returns a modifed \code{MADproject}
+object where the \code{observations} and \code{realizations}
+slots are replaced
 }
 

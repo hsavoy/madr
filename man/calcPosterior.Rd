@@ -2,19 +2,19 @@
 % Please edit documentation in R/calcPosterior.R
 \name{calcPosterior}
 \alias{calcPosterior}
-\title{Calculate the posterior for a MADproject object.}
+\title{Calculate the posterior for a \code{MADproject} object.}
 \usage{
 calcPosterior(proj, likes)
 }
 \arguments{
-\item{proj}{The MADproject object with data read from the MAD# databases.}
-
-\item{likes}{The likelihood values.}
+\item{proj}{The \code{MADproject} object with the \code{likelihood}
+slot filled.}
 }
 \value{
-NULL.
+proj An updated \code{MADproject} object with the
+\code{posterior} slot filled.
 }
 \description{
-\code{calcPosterior} returns the posterior values ...
+\code{calcPosterior} returns the posterior values for each sample
 }
 

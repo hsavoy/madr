@@ -29,7 +29,6 @@ Collate:
     'plot.R'
     'readMAD.R'
     'reduceData.R'
-    'reduceFUN.R'
     'test_convergence.R'
 RoxygenNote: 5.0.1.9000
 Suggests:

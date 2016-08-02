@@ -1,24 +1,22 @@
 #' @include MADproject.R
 NULL
 
-#' Plot the MADproject object
+#' Plot the data contained in MADproject object slots.
 #'
-#' \code{plot.MADproject} plots ...
+#' \code{plot} plots the data contained in various
+#' slots of the provided MADproject. If no specific slot is
+#' specified, all slots that can be plotted will be.
+#'
+#' All plots utilize \pkg{ggplot2} plotting functions. The slots
+#' that can be plotted are \code{priors}, \code{observations},
+#' \code{realizations}, and \code{posteriors}.
 #'
 #' @param x The MADproject object
-#' @param y not supported
-#' @param ... not supported
-#' @return NULL.
+#' @param y character string from the following options: "observations",
+#' "realizations", "priors", or "posteriors"
+#' @return NULL
 #'
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 geom_ribbon
-#' @importFrom ggplot2 geom_line
-#' @importFrom ggplot2 geom_vline
-#' @importFrom ggplot2 geom_bar
-#' @importFrom ggplot2 aes
-#' @importFrom ggplot2 guides
-#' @importFrom ggplot2 xlab
-#' @importFrom ggplot2 ylab
+#' @import ggplot2
 #' @importFrom Rmisc multiplot
 #' @importFrom plyr dlply
 #'
@@ -32,10 +30,12 @@ setMethod("plot",
             if(length(x@observations) > 0){
               plot(x,"observations",...)
               #Plot realizations if not too many samples
-              if((x@numSamples < 5)) { #&& (length(x@realizations)>0)){
+              if((x@numSamples < 5)) {
                 plot(x,"realizations",...)
               }
             }
+            #Plot priors
+            plot(x, "priors")
             #Plot posterior
             if(length(x@posteriors) > 0) plot(x, "posteriors")
           }
@@ -47,9 +47,6 @@ setMethod("plot",
             switch(y,
                    observations = {
                      if(length(x@observations) == x@numTimesteps){
-                      plot(1:x@numTimesteps,x@observations,
-                           main="Observations", xlab="time steps",
-                           type="l",...)
                       df <- data.frame(obs=x@observations,
                                        time=1:length(x@observations))
                       ggplot(df) + geom_line(aes(x=time,y=obs)) +
@@ -72,7 +69,7 @@ setMethod("plot",
                             geom_line(aes(x=zid,y=obs)) +
                             guides(color="none") +
                             xlab("Time steps") +
-                            ylab(paste("zb, Observed and Sample",d$sid))
+                            ylab(paste("zb, Sample",d$sid))
                           }
                         )
                         multiplot(plotlist=plots,cols=round(sqrt(x@numSamples)))
@@ -87,14 +84,16 @@ setMethod("plot",
                          )
                          multiplot(plotlist=plots,cols=round(sqrt(length(x@observations))))
                      } else {  #Reduced
-                        obs <- data.frame(zid=1:length(x@observations), obs=x@observations)
+                        obs <- data.frame(zid=1:length(x@observations),
+                                          obs=x@observations)
                          plots <- dlply(merge(x@realizations,obs), "zid",
                                         function(d){
                                           ggplot(d, aes(x=value, group=as.factor(sid),
                                                         colour=as.factor(sid)))  +
                                             geom_density(alpha=0.25) +
                                             scale_colour_discrete(name = "Sample ID") +
-                                            geom_vline(aes(xintercept=obs))
+                                            geom_vline(aes(xintercept=obs)) +
+                                            xlab(paste("Parameter",d$zid))
                                         }
                          )
                          multiplot(plotlist=plots,cols=round(sqrt(x@numTheta+x@numAnchors)))
@@ -112,7 +111,7 @@ setMethod("plot",
                      )
                      multiplot(plotlist=plots,cols=round(sqrt(x@numTheta+x@numAnchors)))
                     },
-                   priors = {  ### always doing histogram
+                   priors = {
                      plots <- dlply(x@priors, "tid",
                                     function(d){
                                       ggplot(d, aes(priorvalue,y=priordens))  +

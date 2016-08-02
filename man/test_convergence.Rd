@@ -2,18 +2,30 @@
 % Please edit documentation in R/test_convergence.R
 \name{test_convergence}
 \alias{test_convergence}
-\title{Test the convergence of a MADproject object.}
+\title{Test (visually) the convergence of a MADproject object.}
 \usage{
-test_convergence(proj, data, ...)
+test_convergence(proj, dsubset, ...)
 }
 \arguments{
-\item{proj}{The MADproject object.}
+\item{proj}{The MADproject object to be tested.}
+
+\item{dsubset}{The subset of inversion data to use for the likelihood
+calculations.}
+
+\item{samples}{A vector of sample IDs for which to calculate
+likelihood values (defaults to all available in the}
+
+\item{NR}{The number of different realization totals for which to
+calculate likelihood values (defaults to 10)}
+
+\item{NS}{The number of randomly selected samples to test (defaults to 7)}
 }
 \value{
 NULL.
 }
 \description{
 \code{test_convergence} returns a plot to help the user to visualize if
-there are enough realizations in the project
+there are enough realizations in the project for converged likelihood
+values
 }
 

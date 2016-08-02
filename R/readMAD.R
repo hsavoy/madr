@@ -6,11 +6,17 @@ NULL
 #' \code{readMAD} returns an updated MADproject object with data from
 #' the MAD# databases.
 #'
+#'
 #' @param proj The MADproject object with the slots \code{madname},
 #'   \code{resultname}, and \code{xpath} specified.
-#' @return An updated MADproject object with slots \code{numTimesteps},
-#'    \code{numLocations}, \code{numSamples}, \code{observations},
+#' @return proj An updated MADproject object with slots \code{numTimesteps},
+#'    \code{numLocations}, \code{numSamples}, \code{numAnchors},
+#'    \code{numTheta}, \code{observations}, \code{priors},
+#'    \code{truevalues} (if present),
 #'    and \code{realizations} filled in from the MAD# databases.
+#'
+#' @importFrom np npudens
+#' @importFrom np npudensbw
 #'
 #' @export
 setGeneric("readMAD", function(proj, location) {
@@ -35,14 +41,10 @@ setMethod("readMAD",
             sqlvector=paste("select sv.value from  selectionvalues sv, likelihoodselecgroup s where sv.idselectionvalues= s.idselectionvalues   and s.idlikegroup=",1," order by sv.idselectionvalues;",sep='');
             res<- RSQLite::dbSendQuery(con,sqlvector)
             vector <- DBI::fetch(res, n=-1)
-            #Observationvector <- vector$value
             proj@observations <- vector$value[(1:proj@numTimesteps) + (location-1)*proj@numTimesteps]
             RSQLite::dbClearResult(res)
-            #proj@observations <- matrix(Observationvector,nrow=proj@numTimesteps,
-            #                            ncol=proj@numLocations, byrow=FALSE)
 
             #Read realizations
-            #proj@realizations <- vector("list",proj@numSamples)
             for(sample in 1:proj@numSamples){
               dbs=paste(datasample,sample,".xdata",sep='')
               if (file.exists(dbs)){
@@ -74,7 +76,6 @@ setMethod("readMAD",
                                            data.frame(sid=rep(sample,nrow(tmp)*ncol(tmp)),
                                                       rid=rep(1:nrow(tmp),times=ncol(tmp)),
                                                       zid=rep(1:ncol(tmp),each=nrow(tmp)),
-                                                      #ztype=,
                                                       value=as.vector(tmp)
                                                       )
                                            )
@@ -89,7 +90,6 @@ setMethod("readMAD",
             )))
             priordata$sid <- 1:proj@numSamples
             priordata <- melt(priordata, "sid")
-            #names(priordata) <- c("sid","tid","priorvalue")
             tmp <- as.data.frame(dlply(priordata, .(variable), function(param){
               npudens(tdat=param$value,
                       edat=param$value)$dens
@@ -98,10 +98,8 @@ setMethod("readMAD",
 
             tmp$sid <- 1:proj@numSamples
             tmp2 <- melt(tmp,"sid")
-            #names(tmp2) <- c("sid", "tid", "priordens")
             tmp2$tid <- unlist(lapply(strsplit(as.character(tmp2$variable), "V"),
                                       function(x){x[-1]}))
-            #tmp2 <- dplyr::mutate(tmp2, name=param.names[tid])
             proj@priors <- cbind(tmp2[,-2],name=param.names[as.numeric(tmp2$tid)],
                                  priorvalue=priordata$value)
             names(proj@priors)[2] <- "priordens"

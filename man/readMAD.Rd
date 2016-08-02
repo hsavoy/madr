@@ -11,8 +11,10 @@ readMAD(proj, location)
 \code{resultname}, and \code{xpath} specified.}
 }
 \value{
-An updated MADproject object with slots \code{numTimesteps},
-   \code{numLocations}, \code{numSamples}, \code{observations},
+proj An updated MADproject object with slots \code{numTimesteps},
+   \code{numLocations}, \code{numSamples}, \code{numAnchors},
+   \code{numTheta}, \code{observations}, \code{priors},
+   \code{truevalues} (if present),
    and \code{realizations} filled in from the MAD# databases.
 }
 \description{
