@@ -24,8 +24,7 @@ NULL
 #'
 #' @importFrom plyr daply
 #' @importFrom plyr .
-#' @importFrom np npudens
-#' @importFrom np npudensbw
+#' @import np
 #'
 #' @export
 setGeneric("calcLikelihood", function(proj, dsubset, ...) {
@@ -37,11 +36,11 @@ setMethod("calcLikelihood",
           function(proj, dsubset, num_realz=max(proj@realizations$rid), samples=1:proj@numSamples) {
             use <- subset(proj@realizations,
                           sid %in% samples & rid <= num_realz & zid %in% dsubset)
-            proj@likelihoods <- data.frame(sid=unique(use$sid),
+            suppressWarnings(proj@likelihoods <- data.frame(sid=unique(use$sid),
                                            like=daply(use, .(sid),
                                                       npLike,
                                                       obs=proj@observations[dsubset])
-            )
+            ))
             return(proj)
           }
 )
@@ -61,6 +60,7 @@ setMethod("calcLikelihood",
 )
 
 npLike <- function(realz, obs){
-  return(npudens(tdat=reshape2::dcast(realz,rid~zid,sum)[,-1],
-                 edat=as.data.frame(t(obs)))$dens)
+  options(np.messages=FALSE)
+  return(suppressWarnings(npudens(tdat=reshape2::dcast(realz,rid~zid,sum)[,-1],
+                 edat=as.data.frame(t(obs)))$dens))
 }
